@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level Up Africa — Quiz Culture Tech & Innovation Africaine</title>
+  <meta name="description" content="Quiz interactif sur les startups, inventeurs et success stories tech d'Afrique. Réponds bien et deviens le/la Future Elon Musk africain·e." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+
+    <!-- ===================== SCREEN 1 — START ===================== -->
+    <section id="screen-start" class="screen is-active">
+      <div class="card">
+        <p class="eyebrow" id="theme-label">Level Up Africa</p>
+        <h1 class="start-title">Deviens le/la <span>Future Elon Musk</span> africain·e</h1>
+        <p class="start-tagline" id="theme-tagline">
+          Startups, inventeurs et success stories tech du continent.
+        </p>
+
+        <ul class="rules-list">
+          <li><span class="dot">1</span><span><strong id="total-questions-start">20</strong> questions à choix multiple, une à la fois.</span></li>
+          <li><span class="dot">2</span><span>15 secondes par question — le temps compte autant que la réponse.</span></li>
+          <li><span class="dot">3</span><span>Chaque bonne réponse te rapproche du rang suivant, jusqu'au niveau 5.</span></li>
+        </ul>
+
+        <button id="start-btn" class="btn btn-primary">Commencer le quiz</button>
+      </div>
+      <p class="footer-note">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
+    </section>
+
+    <!-- ===================== SCREEN 2 — QUIZ ===================== -->
+    <section id="screen-quiz" class="screen">
+      <div class="card">
+
+        <div class="quiz-header">
+          <div class="rank-block">
+            <div id="rank-badge" class="rank-badge"></div>
+            <div class="rank-info">
+              <span id="rank-name" class="rank-name">Recrue Curieuse</span>
+              <span id="rank-sub" class="rank-sub">Niveau 1 / 5</span>
+            </div>
+          </div>
+          <div id="timer" class="timer">15</div>
+        </div>
+
+        <div class="rank-meter" id="rank-meter"></div>
+
+        <div class="progress-row">
+          <span id="question-count">Question 1 / 20</span>
+          <span id="score-live">Score : 0</span>
+        </div>
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+
+        <h2 id="question-text" class="question-text">Chargement de la question…</h2>
+        <div id="options-grid" class="options-grid"></div>
+
+        <p id="feedback-line" class="feedback-line"></p>
+      </div>
+    </section>
+
+    <!-- ===================== SCREEN 3 — RESULT ===================== -->
+    <section id="screen-result" class="screen">
+      <div class="card">
+        <div class="result-badge-wrap">
+          <div id="result-badge" class="result-badge"></div>
+          <h2 id="result-rank" class="result-rank">Recrue Curieuse</h2>
+          <p id="result-score" class="result-score">Score final : 0 / 20</p>
+          <p id="result-message" class="result-message"></p>
+        </div>
+        <div class="result-actions">
+          <button id="replay-btn" class="btn btn-primary">Rejouer</button>
+        </div>
+      </div>
+      <p class="footer-note">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
+    </section>
+
+  </main>
+
+  <script src="data/questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
