@@ -11,28 +11,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem("lua-visual-theme") || "dark";
+        document.documentElement.setAttribute("data-visual-theme", savedTheme);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
+  <div class="top-controls">
+    <div class="lang-switch" role="group" aria-label="Langue / Language / Idioma">
+      <button class="lang-btn" data-lang="fr" type="button">FR</button>
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+      <button class="lang-btn" data-lang="es" type="button">ES</button>
+    </div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Basculer mode clair / sombre">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z" fill="currentColor"/></svg>
+    </button>
+  </div>
+
   <main class="app">
 
     <!-- ===================== SCREEN 1 — START ===================== -->
     <section id="screen-start" class="screen is-active">
       <div class="card">
         <p class="eyebrow" id="theme-label">Level Up Africa</p>
-        <h1 class="start-title">Deviens le/la <span>Future Elon Musk</span> africain·e</h1>
+        <h1 class="start-title" id="start-title">Deviens le/la <span>Future Elon Musk</span> africain·e</h1>
         <p class="start-tagline" id="theme-tagline">
           Startups, inventeurs et success stories tech du continent.
         </p>
 
         <ul class="rules-list">
-          <li><span class="dot">1</span><span><strong id="total-questions-start">20</strong> questions à choix multiple, une à la fois.</span></li>
-          <li><span class="dot">2</span><span>15 secondes par question — le temps compte autant que la réponse.</span></li>
-          <li><span class="dot">3</span><span>Chaque bonne réponse te rapproche du rang suivant, jusqu'au niveau 5.</span></li>
+          <li><span class="dot">1</span><span><strong id="total-questions-start">20</strong> <span id="rule1-text"></span></span></li>
+          <li><span class="dot">2</span><span><strong id="seconds-per-question">15</strong> <span id="rule2-text"></span></span></li>
+          <li><span class="dot">3</span><span id="rule3-text"></span></li>
         </ul>
 
         <button id="start-btn" class="btn btn-primary">Commencer le quiz</button>
       </div>
-      <p class="footer-note">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
+      <p class="footer-note footer-note-1">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
     </section>
 
     <!-- ===================== SCREEN 2 — QUIZ ===================== -->
@@ -78,12 +98,13 @@
           <button id="replay-btn" class="btn btn-primary">Rejouer</button>
         </div>
       </div>
-      <p class="footer-note">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
+      <p class="footer-note footer-note-2">Level Up Africa — Projet individuel · Vacances L1 · IFRI</p>
     </section>
 
   </main>
 
   <script src="data/questions.js"></script>
+  <script src="i18n.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

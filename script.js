@@ -1,53 +1,13 @@
 /**
  * LEVEL UP AFRICA — Quiz Culture Tech & Innovation Africaine
  * Logique JS vanilla — aucune librairie externe.
+ * Gère aussi la langue (FR/EN/ES) et le mode clair/sombre.
  */
 
 // ---------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------
 const SECONDS_PER_QUESTION = 15;
-
-const RANK_TIERS = [
-  {
-    threshold: 0,
-    name: "Recrue Curieuse",
-    sub: "Niveau 1 / 5",
-    icon: "seed"
-  },
-  {
-    threshold: 20,
-    name: "Apprentie Codeuse",
-    sub: "Niveau 2 / 5",
-    icon: "spark"
-  },
-  {
-    threshold: 40,
-    name: "Bâtisseuse Digitale",
-    sub: "Niveau 3 / 5",
-    icon: "block"
-  },
-  {
-    threshold: 60,
-    name: "Innovatrice Panafricaine",
-    sub: "Niveau 4 / 5",
-    icon: "bolt"
-  },
-  {
-    threshold: 80,
-    name: "Future Elon Musk Africain·e",
-    sub: "Niveau 5 / 5",
-    icon: "rocket"
-  }
-];
-
-const RESULT_MESSAGES = [
-  { min: 0, text: "Chaque expert a commencé quelque part. Rejoue le quiz pour ancrer ces notions et grimper de niveau." },
-  { min: 20, text: "Tu tiens quelque chose ! Les bases sont là, continue à explorer l'écosystème tech africain." },
-  { min: 40, text: "Solide progression. Ton radar à innovation s'affine, thème après thème." },
-  { min: 60, text: "Belle performance ! Tu connais déjà bien les acteurs qui façonnent la tech en Afrique." },
-  { min: 80, text: "Score exceptionnel. Statut « Future Elon Musk africain·e » débloqué — à toi de construire la suite !" }
-];
 
 const BADGE_ICONS = {
   seed: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="currentColor"/></svg>',
@@ -56,6 +16,20 @@ const BADGE_ICONS = {
   bolt: '<svg viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor"/></svg>',
   rocket: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2c3 2 5 6 5 10 0 2-1 4-2 5l-1 3-2-2-2 2-1-3c-1-1-2-3-2-5 0-4 2-8 5-10z" fill="currentColor"/><circle cx="12" cy="10" r="1.6" fill="var(--bg,#0b0f1a)"/></svg>'
 };
+
+const START_TITLES = {
+  fr: 'Deviens le/la <span>Future Elon Musk</span> africain·e',
+  en: 'Become the next <span>African Elon Musk</span>',
+  es: 'Conviértete en la próxima <span>Elon Musk africana</span>'
+};
+
+// ---------------------------------------------------------
+// Language & theme (persisted preferences)
+// ---------------------------------------------------------
+let currentLang = localStorage.getItem("lua-lang") || DEFAULT_LANG;
+if (!SUPPORTED_LANGS.includes(currentLang)) currentLang = DEFAULT_LANG;
+
+let currentVisualTheme = localStorage.getItem("lua-visual-theme") || "dark";
 
 // ---------------------------------------------------------
 // State
@@ -82,7 +56,12 @@ const screens = {
 const el = {
   themeLabel: document.getElementById("theme-label"),
   themeTagline: document.getElementById("theme-tagline"),
+  startTitle: document.getElementById("start-title"),
   totalQuestionsStart: document.getElementById("total-questions-start"),
+  secondsPerQuestion: document.getElementById("seconds-per-question"),
+  rule1Text: document.getElementById("rule1-text"),
+  rule2Text: document.getElementById("rule2-text"),
+  rule3Text: document.getElementById("rule3-text"),
   startBtn: document.getElementById("start-btn"),
 
   rankBadge: document.getElementById("rank-badge"),
@@ -102,20 +81,14 @@ const el = {
   resultRank: document.getElementById("result-rank"),
   resultScore: document.getElementById("result-score"),
   resultMessage: document.getElementById("result-message"),
-  replayBtn: document.getElementById("replay-btn")
+  replayBtn: document.getElementById("replay-btn"),
+
+  footerNotes: document.querySelectorAll(".footer-note"),
+  langBtns: document.querySelectorAll(".lang-btn"),
+  themeToggle: document.getElementById("theme-toggle")
 };
 
 const KEYS = ["A", "B", "C", "D"];
-
-// ---------------------------------------------------------
-// Init static content
-// ---------------------------------------------------------
-el.themeLabel.textContent = theme.label;
-el.themeTagline.textContent = theme.tagline;
-el.totalQuestionsStart.textContent = questions.length;
-
-buildRankMeterTicks();
-setRankDisplay(0);
 
 // ---------------------------------------------------------
 // Screen navigation
@@ -125,14 +98,96 @@ function showScreen(name) {
   screens[name].classList.add("is-active");
 }
 
+function isScreenActive(name) {
+  return screens[name].classList.contains("is-active");
+}
+
+// ---------------------------------------------------------
+// Language application
+// ---------------------------------------------------------
+function applyStaticTexts() {
+  document.documentElement.lang = currentLang;
+
+  el.themeLabel.textContent = theme.label[currentLang];
+  el.themeTagline.textContent = theme.tagline[currentLang];
+  el.startTitle.innerHTML = START_TITLES[currentLang];
+  el.totalQuestionsStart.textContent = questions.length;
+  el.secondsPerQuestion.textContent = SECONDS_PER_QUESTION;
+  el.rule1Text.textContent = t("rule1", currentLang);
+  el.rule2Text.textContent = t("rule2", currentLang);
+  el.rule3Text.textContent = t("rule3", currentLang);
+  el.startBtn.textContent = t("startBtn", currentLang);
+  el.replayBtn.textContent = t("replayBtn", currentLang);
+  el.footerNotes.forEach((node) => (node.textContent = t("footerNote", currentLang)));
+
+  el.langBtns.forEach((btn) => {
+    btn.classList.toggle("is-active", btn.dataset.lang === currentLang);
+  });
+
+  const toggleLabel =
+    currentVisualTheme === "dark" ? t("themeLightLabel", currentLang) : t("themeDarkLabel", currentLang);
+  el.themeToggle.setAttribute("aria-label", toggleLabel);
+  el.themeToggle.title = toggleLabel;
+}
+
+function refreshDynamicTexts() {
+  setRankDisplay(selectedRankIndex);
+
+  if (isScreenActive("quiz")) {
+    el.questionCount.textContent = t("questionCount", currentLang, {
+      current: currentIndex + 1,
+      total: questions.length
+    });
+    el.scoreLive.textContent = t("scoreLive", currentLang, { score: correctCount });
+
+    const q = questions[currentIndex];
+    if (q) {
+      el.questionText.textContent = q.question[currentLang];
+      [...el.optionsGrid.children].forEach((btn, i) => {
+        const label = btn.querySelector("span:last-child");
+        if (label) label.textContent = q.options[currentLang][i];
+      });
+    }
+  }
+
+  if (isScreenActive("result")) {
+    renderResultTexts();
+  }
+}
+
+function setLanguage(lang) {
+  if (!SUPPORTED_LANGS.includes(lang) || lang === currentLang) return;
+  currentLang = lang;
+  localStorage.setItem("lua-lang", lang);
+  applyStaticTexts();
+  refreshDynamicTexts();
+}
+
+// ---------------------------------------------------------
+// Visual theme (dark / light)
+// ---------------------------------------------------------
+function applyVisualTheme() {
+  document.documentElement.setAttribute("data-visual-theme", currentVisualTheme);
+  const toggleLabel =
+    currentVisualTheme === "dark" ? t("themeLightLabel", currentLang) : t("themeDarkLabel", currentLang);
+  el.themeToggle.setAttribute("aria-label", toggleLabel);
+  el.themeToggle.title = toggleLabel;
+}
+
+function toggleVisualTheme() {
+  currentVisualTheme = currentVisualTheme === "dark" ? "light" : "dark";
+  localStorage.setItem("lua-visual-theme", currentVisualTheme);
+  applyVisualTheme();
+}
+
 // ---------------------------------------------------------
 // Rank meter (signature element)
 // ---------------------------------------------------------
 function buildRankMeterTicks() {
   el.rankMeter.innerHTML = "";
-  RANK_TIERS.forEach((_, i) => {
+  RANK_TIERS_I18N.forEach((_, i) => {
     const tick = document.createElement("div");
-    tick.className = "tick" + (i === RANK_TIERS.length - 1 ? " is-final" : "");
+    tick.className = "tick" + (i === RANK_TIERS_I18N.length - 1 ? " is-final" : "");
     tick.dataset.index = i;
     el.rankMeter.appendChild(tick);
   });
@@ -140,18 +195,18 @@ function buildRankMeterTicks() {
 
 function getRankForPercent(percent) {
   let idx = 0;
-  RANK_TIERS.forEach((tier, i) => {
+  RANK_TIERS_I18N.forEach((tier, i) => {
     if (percent >= tier.threshold) idx = i;
   });
   return idx;
 }
 
 function setRankDisplay(rankIndex) {
-  const tier = RANK_TIERS[rankIndex];
+  const tier = RANK_TIERS_I18N[rankIndex];
   el.rankBadge.innerHTML = BADGE_ICONS[tier.icon];
-  el.rankBadge.style.color = rankIndex === RANK_TIERS.length - 1 ? "var(--gold)" : "var(--text)";
-  el.rankName.textContent = tier.name;
-  el.rankSub.textContent = tier.sub;
+  el.rankBadge.style.color = rankIndex === RANK_TIERS_I18N.length - 1 ? "var(--gold)" : "var(--text)";
+  el.rankName.textContent = tier.name[currentLang];
+  el.rankSub.textContent = tier.sub[currentLang];
 
   [...el.rankMeter.children].forEach((tick, i) => {
     tick.classList.toggle("is-filled", i <= rankIndex);
@@ -159,7 +214,7 @@ function setRankDisplay(rankIndex) {
 }
 
 function updateRankMeterLive() {
-  const answered = currentIndex; // questions fully answered so far
+  const answered = currentIndex;
   const percent = answered === 0 ? 0 : Math.round((correctCount / answered) * 100);
   const rankIndex = answered === 0 ? 0 : getRankForPercent(percent);
   if (rankIndex !== selectedRankIndex) {
@@ -188,13 +243,16 @@ function renderQuestion() {
   el.feedbackLine.className = "feedback-line";
 
   const q = questions[currentIndex];
-  el.questionCount.textContent = `Question ${currentIndex + 1} / ${questions.length}`;
-  el.scoreLive.textContent = `Score : ${correctCount}`;
+  el.questionCount.textContent = t("questionCount", currentLang, {
+    current: currentIndex + 1,
+    total: questions.length
+  });
+  el.scoreLive.textContent = t("scoreLive", currentLang, { score: correctCount });
   el.progressFill.style.width = `${(currentIndex / questions.length) * 100}%`;
-  el.questionText.textContent = q.question;
+  el.questionText.textContent = q.question[currentLang];
 
   el.optionsGrid.innerHTML = "";
-  q.options.forEach((option, i) => {
+  q.options[currentLang].forEach((option, i) => {
     const btn = document.createElement("button");
     btn.className = "option-btn";
     btn.innerHTML = `<span class="key">${KEYS[i]}</span><span>${escapeHTML(option)}</span>`;
@@ -228,24 +286,25 @@ function handleAnswer(selectedOption, clickedBtn) {
   clearInterval(timerId);
 
   const q = questions[currentIndex];
-  const isCorrect = selectedOption === q.answer;
+  const correctAnswer = q.answer[currentLang];
+  const isCorrect = selectedOption === correctAnswer;
 
   [...el.optionsGrid.children].forEach((btn) => {
     btn.disabled = true;
     const label = btn.querySelector("span:last-child").textContent;
-    if (label === q.answer) btn.classList.add("is-correct");
+    if (label === correctAnswer) btn.classList.add("is-correct");
     else if (btn === clickedBtn) btn.classList.add("is-wrong");
   });
 
   if (isCorrect) {
     correctCount += 1;
-    el.feedbackLine.textContent = "Bonne réponse !";
+    el.feedbackLine.textContent = t("correctFeedback", currentLang);
     el.feedbackLine.classList.add("correct");
   } else if (selectedOption === null) {
-    el.feedbackLine.textContent = `Temps écoulé — la bonne réponse était : ${q.answer}`;
+    el.feedbackLine.textContent = t("timeUpFeedback", currentLang, { answer: correctAnswer });
     el.feedbackLine.classList.add("wrong");
   } else {
-    el.feedbackLine.textContent = "Mauvaise réponse.";
+    el.feedbackLine.textContent = t("wrongFeedback", currentLang);
     el.feedbackLine.classList.add("wrong");
   }
 
@@ -261,21 +320,27 @@ function handleAnswer(selectedOption, clickedBtn) {
   }, 1100);
 }
 
+function renderResultTexts() {
+  const percent = Math.round((correctCount / questions.length) * 100);
+  const rankIndex = getRankForPercent(percent);
+  const tier = RANK_TIERS_I18N[rankIndex];
+  const message = [...RESULT_MESSAGES_I18N].reverse().find((m) => percent >= m.min).text[currentLang];
+
+  el.resultBadge.innerHTML = BADGE_ICONS[tier.icon];
+  el.resultBadge.style.color = rankIndex === RANK_TIERS_I18N.length - 1 ? "var(--gold)" : "var(--text)";
+  el.resultRank.textContent = tier.name[currentLang];
+  el.resultScore.innerHTML = t("resultScore", currentLang, {
+    score: correctCount,
+    total: questions.length,
+    percent
+  });
+  el.resultMessage.textContent = message;
+}
+
 function finishQuiz() {
   clearInterval(timerId);
   el.progressFill.style.width = "100%";
-
-  const percent = Math.round((correctCount / questions.length) * 100);
-  const rankIndex = getRankForPercent(percent);
-  const tier = RANK_TIERS[rankIndex];
-  const message = [...RESULT_MESSAGES].reverse().find((m) => percent >= m.min).text;
-
-  el.resultBadge.innerHTML = BADGE_ICONS[tier.icon];
-  el.resultBadge.style.color = rankIndex === RANK_TIERS.length - 1 ? "var(--gold)" : "var(--text)";
-  el.resultRank.textContent = tier.name;
-  el.resultScore.innerHTML = `Score final : <b>${correctCount} / ${questions.length}</b> (${percent}%)`;
-  el.resultMessage.textContent = message;
-
+  renderResultTexts();
   showScreen("result");
 }
 
@@ -286,7 +351,19 @@ function escapeHTML(str) {
 }
 
 // ---------------------------------------------------------
+// Init
+// ---------------------------------------------------------
+applyVisualTheme();
+buildRankMeterTicks();
+applyStaticTexts();
+setRankDisplay(0);
+
+// ---------------------------------------------------------
 // Events
 // ---------------------------------------------------------
 el.startBtn.addEventListener("click", startQuiz);
 el.replayBtn.addEventListener("click", startQuiz);
+el.themeToggle.addEventListener("click", toggleVisualTheme);
+el.langBtns.forEach((btn) => {
+  btn.addEventListener("click", () => setLanguage(btn.dataset.lang));
+});

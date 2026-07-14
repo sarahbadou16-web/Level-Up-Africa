@@ -18,6 +18,8 @@ Le problème que le projet résout est pédagogique : ancrer la manipulation du 
 - [x] Indicateur de rang à 5 niveaux, mis à jour en direct pendant le quiz
 - [x] Écran de résultats final avec message personnalisé selon le score
 - [x] Design responsive (mobile et desktop)
+- [x] Interface multilingue (Français / English / Español), avec sélecteur en un clic
+- [x] Mode clair et mode sombre, avec préférence mémorisée d'une session à l'autre
 - [ ] Déploiement sur GitHub Pages *(à faire après le premier push — voir plus bas)*
 
 ## Stack technique
@@ -25,9 +27,11 @@ Le problème que le projet résout est pédagogique : ancrer la manipulation du 
 | Couche | Techno |
 |---|---|
 | Structure | HTML5 |
-| Style | CSS3 (vanilla, variables CSS) |
+| Style | CSS3 (vanilla, variables CSS, thèmes clair/sombre via `data-visual-theme`) |
 | Logique | JavaScript vanilla (aucun framework, aucune librairie externe pour la logique du quiz) |
-| Données | Tableau d'objets JS (`data/questions.js`) |
+| Données | Tableau d'objets JS (`data/questions.js`), chaque question traduite en FR/EN/ES |
+| Internationalisation | Dictionnaire JS maison (`i18n.js`), pas de librairie i18n externe |
+| Persistance des préférences | `localStorage` (langue choisie + thème clair/sombre) |
 | Typographie | Sora (titres), Inter (texte), JetBrains Mono (score / timer) — via Google Fonts |
 | Hébergement | GitHub Pages |
 
@@ -52,11 +56,12 @@ python -m http.server 8000
 
 ```
 level-up-africa-quiz/
-├── index.html              → structure des 3 écrans (accueil, quiz, résultats)
-├── style.css                → design system (couleurs, typographie, layout, responsive)
-├── script.js                → logique du quiz (state machine, timer, score, rang)
+├── index.html              → structure des 3 écrans (accueil, quiz, résultats) + contrôles langue/thème
+├── style.css                → design system (couleurs, typographie, layout, responsive, clair/sombre)
+├── script.js                → logique du quiz (state machine, timer, score, rang, langue, thème visuel)
+├── i18n.js                   → dictionnaire de traductions FR/EN/ES (textes d'interface, rangs, messages)
 ├── data/
-│   └── questions.js          → banque de questions (3 thèmes × 20 questions)
+│   └── questions.js          → banque de questions (3 thèmes × 20 questions), chacune en FR/EN/ES
 ├── assets/
 │   ├── images/                → réservé aux visuels additionnels
 │   └── fonts/                 → réservé aux polices auto-hébergées
@@ -69,13 +74,16 @@ Le thème actif du quiz se change en modifiant une seule constante dans `data/qu
 const ACTIVE_THEME = "levelUpAfrica"; // ou "naijaBeninTrivia" / "devTrivia"
 ```
 
+La langue et le mode clair/sombre, eux, se changent directement dans l'interface (boutons FR/EN/ES et icône soleil/lune en haut à droite) — aucune configuration en dur n'est nécessaire, et le choix de l'utilisateur est mémorisé via `localStorage`.
+
 ## Roadmap (évolutions possibles)
 
-- Sélecteur de thème directement dans l'interface (actuellement le thème actif se change en une ligne de code)
+- Sélecteur de thème (Level Up Africa / Naija-Benin Trivia / Dev Trivia) directement dans l'interface (actuellement il se change en une ligne de code dans `data/questions.js`)
 - Leaderboard multi-joueurs partagé
 - Backend + comptes utilisateurs pour sauvegarder la progression
 - Extension du pack de questions au-delà de 20 par thème
 - Mode difficulté (temps par question ajustable)
+- Ajout d'autres langues (ex. Fon, Yoruba) au sélecteur existant
 
 ## Auteur
 

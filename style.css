@@ -28,6 +28,37 @@
   --radius-sm: 8px;
 }
 
+/* =========================================================
+   LIGHT MODE — token overrides
+   Toggled via [data-visual-theme="light"] on <html>
+   ========================================================= */
+html[data-visual-theme="light"] {
+  --bg: #f6f4ee;
+  --bg-grid: #e7e2d3;
+  --surface: #ffffff;
+  --surface-raised: #f1ede2;
+  --border: rgba(20, 16, 10, 0.08);
+  --border-strong: rgba(20, 16, 10, 0.16);
+
+  --text: #14100a;
+  --text-muted: #6b7180;
+
+  --gold: #b8860f;
+  --gold-soft: rgba(184, 134, 15, 0.14);
+  --coral: #e0512f;
+  --coral-soft: rgba(224, 81, 47, 0.12);
+  --teal: #1f9c78;
+  --teal-soft: rgba(31, 156, 120, 0.14);
+}
+
+html[data-visual-theme="light"] .btn-primary {
+  color: #fffaf0;
+}
+
+html[data-visual-theme="light"] body::before {
+  opacity: 0.5;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
@@ -50,6 +81,89 @@ body {
   padding: 24px 16px;
   position: relative;
   overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.card,
+.option-btn,
+.rank-badge,
+.result-badge,
+.timer,
+.progress-track,
+.rank-meter .tick {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+/* =========================================================
+   TOP CONTROLS — language switcher + light/dark toggle
+   ========================================================= */
+.top-controls {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-switch {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  padding: 3px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.lang-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.lang-btn:hover { color: var(--text); }
+
+.lang-btn.is-active {
+  background: var(--gold-soft);
+  color: var(--gold);
+}
+
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.theme-toggle:hover { border-color: var(--gold); transform: translateY(-1px); }
+
+.theme-toggle svg { width: 17px; height: 17px; }
+
+.theme-toggle .icon-moon { display: none; }
+html[data-visual-theme="light"] .theme-toggle .icon-sun { display: none; }
+html[data-visual-theme="light"] .theme-toggle .icon-moon { display: block; }
+
+@media (max-width: 480px) {
+  .top-controls { top: 10px; right: 10px; }
 }
 
 /* faint circuit-grid backdrop */
